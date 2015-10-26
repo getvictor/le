@@ -353,37 +353,42 @@ if [ $FOUND == "1" ]; then
 
 	printf "***** Step 3 of 3 - Adding Logs to follow *****\n"
 
-	FILES_FOUND=0
-
-	for x in "${LOGS_TO_FOLLOW[@]}"
-	do
-		if [ -f $x ]; then
-			let FILES_FOUND=FILES_FOUND+1
-		fi
-	done
-
-	printf "$FILES_FOUND additional logs found.\n"
-	read -p "Would you like to monitor all of these too? (n) allows you to choose individual logs...(y) or (n): "
-	printf "\n\n"
-	if [[ $REPLY =~ ^[Yy]$ ]];then
-		printf "Monitoring all logs\n"
-		for j in "${LOGS_TO_FOLLOW[@]}"
+	if [ -n "$2" -a $2 = "skip-adding-logs" ] ; then
+		printf "Skipping adding logs. Add them in the future like: le follow /path/to/file"
+	else
+		FILES_FOUND=0
+	
+		for x in "${LOGS_TO_FOLLOW[@]}"
 		do
-			$FOLLOW_CMD $j >$LOGFILE 2>&1
-			printf "."
-		done
-		printf "\n"
-	else	
-		for j in "${LOGS_TO_FOLLOW[@]}"
-		do
-			if [ -f $j ]; then
-				read -p "Would you like to monitor $j ?..(y) or (n): "
-				if [[ $REPLY =~ ^[Yy]$ ]]; then
-					$FOLLOW_CMD $j >$LOGFILE 2>&1
-				fi
+			if [ -f $x ]; then
+				let FILES_FOUND=FILES_FOUND+1
 			fi
 		done
+	
+		printf "$FILES_FOUND additional logs found.\n"
+		read -p "Would you like to monitor all of these too? (n) allows you to choose individual logs...(y) or (n): "
+		printf "\n\n"
+		if [[ $REPLY =~ ^[Yy]$ ]];then
+			printf "Monitoring all logs\n"
+			for j in "${LOGS_TO_FOLLOW[@]}"
+			do
+				$FOLLOW_CMD $j >$LOGFILE 2>&1
+				printf "."
+			done
+			printf "\n"
+		else	
+			for j in "${LOGS_TO_FOLLOW[@]}"
+			do
+				if [ -f $j ]; then
+					read -p "Would you like to monitor $j ?..(y) or (n): "
+					if [[ $REPLY =~ ^[Yy]$ ]]; then
+						$FOLLOW_CMD $j >$LOGFILE 2>&1
+					fi
+				fi
+			done
+		fi
 	fi
+
 	eval $DAEMON_RESTART_CMD >$LOGFILE 2>&1
 	printf "\n\n"
 	printf "***** Install Complete! *****\n"
