@@ -344,7 +344,7 @@ if [ $FOUND == "1" ]; then
 
         logfile=/var/log/${SYSLOG}
 
-	if [ -f $logfile ]; then
+	if [ -f $logfile -a $2 != "skip-adding-logs" ]; then
 		$FOLLOW_CMD $logfile >$LOGFILE 2>&1
 		printf "The Logentries agent is now monitoring $logfile\n"
 	fi
